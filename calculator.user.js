@@ -54,6 +54,16 @@
 		}
 	};
 
+	function queryStrToJSON(str) {
+		var query = str.replace(/^\?/, '').split('&');
+		var json = {};
+		query.forEach(function(v){
+			v = v.split('=');
+			json[v[0]] = v[1];
+		});
+		return json;
+	}
+
 	function xhr(url, callback) {
 		var x = new XMLHttpRequest();
 		x.open('GET', url);
@@ -162,7 +172,7 @@
 
 
 	Hero.prototype.cast = function(skill) {
-	// create self buff => apply buff => comupte
+	//  apply buff => skill self buff => comupte
 		function getComputedStat(hero, attr) {
 			var main = hero.attr[attr.main];
 			var sub =  hero.attr[attr.sub];
@@ -225,12 +235,13 @@
 		var def_bonus = (skill.attr.def_rate) ? skill.attr.def_rate.bonus : 0;
 	//	var atk_damage = computeDamage(skill.attr.atk_damage);
 
-		var atk_rate_final = (atk_rate * atk_rate_buff.factor + atk_rate_buff.fix) * (100 + atk_bonus) / 100;
-		var def_rate_final = (def_rate * def_rate_buff.factor + def_rate_buff.fix) * (100 + def_bonus) / 100;
+		var atk_rate_final = ((atk_rate * atk_rate_buff.factor + atk_rate_buff.fix) * (100 + atk_bonus) / 100).toFixed(2);
+		var def_rate_final = ((def_rate * def_rate_buff.factor + def_rate_buff.fix) * (100 + def_bonus) / 100).toFixed(2);
 		console.log('LV ' + (this.skill[skill.name] || 0) + ' '+ skill.name);
 		console.log('Accuracy: ' + atk_rate_final);
 		console.log('Dodge: ' + def_rate_final);
 	//	console.log('Damage: ' + atk_damage);
+		return ['LV ' + (this.skill[skill.name] || 0) + ' '+ skill.name, 'Accuracy: ' + atk_rate_final, 'Dodge: ' + def_rate_final]
 	};
 
 	Hero.prototype.computeAccuracyBuff = function(skill, type) {
@@ -539,27 +550,69 @@
 		return res;
 	};
 
-	function queryStrToJSON(str) {
-		var query = str.replace(/^\?/, '').split('&');
-		var json = {};
-		query.forEach(function(v){
-			v = v.split('=');
-			json[v[0]] = v[1];
-		});
-		return json;
+	function UI() {
+		var start_btn = document.createElement('div');
+		start_btn.className = 'skill_calculator btn';
+		start_btn.textContent = '+';
+		this.start_btn = start_btn;
+
+		var main = document.createElement('div')
+		main.className = 'skill_calculator main';
+		this.main = main;
+
+		var search = queryStrToJSON(window.location.search);
+		this.main_hero = new Hero(search.session_hero_id);
+		this.skill = new Skill(decodeURIComponent(search.name), document);
+		this.buff_hero = new Hero(); 
+
+		this.addStyleRule(
+			'.skill_calculator.btn { display: flex; justify-content: center; align-items: center; width: 20px; height: 20px; border: 1px solid rgba(0, 0, 0, 0.5); cursor: pointer; border-radius: 50%; }' +
+			'.skill_calculator.main { padding: 10px; display: none; }' +
+			'.skill_calculator { position: fixed; background: rgba(255, 255, 255, 0.5); color: #000000; bottom: 0px; right:0px; }'
+		);
+		function buildPanel() {
+			this.start_btn.style.display = 'none';
+			this.main.style.display = 'block';
+			this.getHeroInfo().then(this.render.bind(this));
+		}
+
+		document.body.appendChild(this.start_btn);
+		document.body.appendChild(this.main);
+		start_btn.addEventListener('click', buildPanel.bind(this));
 	}
 
-	var search = window.location.search;
-	search = queryStrToJSON(search);
-	var hero_id = search.session_hero_id;
-	if(search.name && hero_id) {
-		var name = decodeURIComponent(search.name);
-		var hero = new Hero(hero_id);
-		var skill = new Skill(name, document);
-		Promise.all([hero.getAttr(), hero.getSkill()]).then(function(r) {
-			console.log(hero);
-			console.log(skill);
-			hero.cast(skill);
+	UI.prototype.addStyleRule = function(str) {
+		var style = document.createElement('style');
+		style.innerHTML = str;
+		document.head.appendChild(style);
+	};
+
+	UI.prototype.init = function() {
+		var ui = this;
+	};
+
+	UI.prototype.getHeroInfo = function() {
+		return promise = Promise.all([this.main_hero.getAttr(), this.main_hero.getSkill()]);
+	};
+
+	UI.prototype.render = function(hero, skill) {
+		var ui = this;
+		console.log(this.main_hero);
+		console.log(this.skill);
+		
+		this.main_hero.cast(this.skill).forEach(function(txt){
+			ui.main.appendChild(ui.addText(txt));
 		});
+	};
+
+	UI.prototype.addText = function(str) {
+		var div = document.createElement('div');
+		div.className = 'text';
+		div.textContent = str;
+		return div;
+	};
+	
+	if(/skill\.php$/.test(window.location.pathname)) {
+		new UI();
 	}
 })();
