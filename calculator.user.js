@@ -4,7 +4,7 @@
 // @updateURL       https://raw.githubusercontent.com/xyzith/wod_skill_calculator/master/calculator.user.js
 // @grant           none
 // @author          Taylor Tang
-// @version         1.0
+// @version         1.1
 // @description     Compute skill accuracy and damage.
 // @match           http*://*.world-of-dungeons.org/*
 // ==/UserScript==
