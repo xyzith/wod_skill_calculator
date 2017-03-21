@@ -4,7 +4,7 @@
 // @updateURL       https://raw.githubusercontent.com/xyzith/wod_skill_calculator/master/calculator.user.js
 // @grant           none
 // @author          Taylor Tang
-// @version         1.1
+// @version         1.11
 // @description     Compute skill accuracy and damage.
 // @match           http*://*.world-of-dungeons.org/*
 // ==/UserScript==
@@ -568,7 +568,7 @@
 		this.addStyleRule(
 			'.skill_calculator.btn { display: flex; justify-content: center; align-items: center; width: 20px; height: 20px; border: 1px solid rgba(0, 0, 0, 0.5); cursor: pointer; border-radius: 50%; }' +
 			'.skill_calculator.main { padding: 10px; display: none; }' +
-			'.skill_calculator { position: fixed; background: rgba(255, 255, 255, 0.5); color: #000000; bottom: 0px; right:0px; }'
+			'.skill_calculator { position: fixed; background: rgba(255, 255, 255, 0.5); color: #000000; bottom: 0px; right:0px; z-index: 9999; }'
 		);
 		function buildPanel() {
 			this.start_btn.style.display = 'none';
