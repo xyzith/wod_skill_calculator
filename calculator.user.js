@@ -6,7 +6,7 @@
 // @author          Taylor Tang
 // @version         1.11
 // @description     Compute skill accuracy and damage.
-// @match           http*://*.world-of-dungeons.org/*
+// @match           *://*.world-of-dungeons.org/*
 // ==/UserScript==
 
 (function(){
